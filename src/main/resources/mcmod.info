@@ -1,0 +1,16 @@
+[
+{
+  "modid": "brokenwings",
+  "name": "Broken Wings",
+  "description": "Disable flight in certain dimensions.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["quaternary"],
+  "credits": "Your MOM!!!!!!!!!! HA",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
