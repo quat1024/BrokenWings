@@ -4,88 +4,94 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigManager;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import quaternary.brokenwings.anticompat.*;
+import quaternary.brokenwings.config.ListMode;
+import quaternary.brokenwings.config.WingConfig;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.*;
 
 @Mod(modid = BrokenWings.MODID, name = BrokenWings.NAME, version = BrokenWings.VERSION)
 public class BrokenWings {
 	public static final String MODID = "brokenwings";
 	public static final String NAME = "Broken Wings";
-	public static final String VERSION = "1.0.0";
+	public static final String VERSION = "2.0.0";
 	
 	public static final Logger LOGGER = LogManager.getLogger(NAME);
 	
 	public static final Map<String, Long> lastMessageTimes = new HashMap<>();
+	public static final Random messageRandom = new Random();
 	
-	public static void dropPlayer(EntityPlayer player) {
-		EntityPlayerMP pmp = (EntityPlayerMP) player;
+	@Mod.EventHandler
+	public static void init(FMLInitializationEvent e) {
+		AntiCompats.init();
 		
-		pmp.capabilities.isFlying = false;
-		pmp.sendPlayerAbilities();
-		pmp.motionX = 0;
-		pmp.motionY -= 0.3;
-		pmp.motionZ = 0;
-		pmp.onGround = true; //forces elytra flight to stop
+		WingConfig.initConfig();
 		
-		//mark player dirty
-		pmp./*isDirty*/isAirBorne = true;
-		pmp.getServerWorld().getEntityTracker().sendToTrackingAndSelf(pmp, new SPacketEntityVelocity(player));
-		
-		long now = pmp.getServerWorld().getTotalWorldTime();
-		
-		//Avoid spamming the player/log
-		if(now - lastMessageTimes.getOrDefault(pmp.getName(), 0L) > 20 * 3) {
-			lastMessageTimes.put(pmp.getName(), now);
-			
-			if(WingConfig.PRINT_TO_LOG) {
-				LOGGER.info("Dropped " + pmp.getName() + " out of the sky. Dimension: " + pmp.dimension + " Position: " + pmp.getPosition().toString().replace("BlockPos", ""));
-			}
-			
-			if(WingConfig.TELL_PLAYER) {
-				final int totalMessages = 9;
-				int message = player.world.rand.nextInt(totalMessages);
-				
-				pmp.sendStatusMessage(new TextComponentTranslation(MODID + ".dropstatus." + message), true);
-				
-				pmp.getServerWorld().spawnParticle(EnumParticleTypes.TOTEM, pmp.posX, pmp.posY, pmp.posZ, 45, 0, 0, 0, .2);
-			}
-		}
+		MinecraftForge.EVENT_BUS.register(BrokenWings.class);
 	}
 	
-	@Mod.EventBusSubscriber(modid = MODID)
-	public static class Events {
-		@SubscribeEvent(priority = EventPriority.LOWEST)
-		public static void playerTick(TickEvent.PlayerTickEvent e) {
-			if(WingConfig.MODE == ConfigMode.WHITELIST_ALL) return;
-			if(e.player.world.isRemote) return;
-			if(e.player.isSpectator() || e.player.isCreative()) return;
+	static final List<String> usedMethods = new ArrayList<>();
+	
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void playerTick(TickEvent.PlayerTickEvent e) {
+		if(WingConfig.MODE == ListMode.ALWAYS_ALLOW) return;
+		EntityPlayer player = e.player;
+		if(player.world.isRemote) return;
+		if(player.isCreative() || player.isSpectator()) return;
+		if(!WingConfig.MODE.isDimensionBanned(player.dimension)) return;
+		
+		EntityPlayerMP playerMP = (EntityPlayerMP) player;
+		
+		boolean wasFlying = false;
+		usedMethods.clear();
+		for(AbstractAntiCompat anti : AntiCompats.get()) {
+			if(anti.isFlying(playerMP)) {
+				wasFlying |= anti.tryStopFlying(playerMP);
+				usedMethods.add(anti.getFriendlyName());
+			}
+		}
+		
+		if(wasFlying) {
+			playerMP.motionX = 0;
+			playerMP.motionY -= 0.3;
+			playerMP.motionZ = 0;
+			playerMP./*isDirty*/isAirBorne = true;
 			
-			if((WingConfig.BAN_ELYTRA && e.player.isElytraFlying()) || e.player.capabilities.isFlying) {
-				switch(WingConfig.MODE) {
-					case BLACKLIST_ALL:
-						dropPlayer(e.player);
-						return;
-					case WHITELIST: {
-						if(IntStream.of(WingConfig.LIST).noneMatch(x -> x == e.player.dimension)) {
-							dropPlayer(e.player);
-						}
+			playerMP.getServerWorld().getEntityTracker().sendToTrackingAndSelf(playerMP, new SPacketEntityVelocity(playerMP));
+			
+			if(WingConfig.SEND_STATUS_MESSAGE || WingConfig.SHOW_PARTICLES || WingConfig.PRINT_TO_LOG) {
+				long now = playerMP.getServerWorld().getTotalWorldTime();
+				
+				if(now - lastMessageTimes.getOrDefault(playerMP.getName(), 0L) > 20 * WingConfig.EFFECT_INTERVAL) {
+					lastMessageTimes.put(playerMP.getName(), now);
+					
+					if(WingConfig.SEND_STATUS_MESSAGE) {
+						int totalMessages = 9;
+						int messageIndex = messageRandom.nextInt(totalMessages);
+						
+						playerMP.sendStatusMessage(new TextComponentTranslation("brokenwings.dropstatus." + messageIndex), true);
 					}
-					break;
-					case BLACKLIST: {
-						if(IntStream.of(WingConfig.LIST).anyMatch(x -> x == e.player.dimension)) {
-							dropPlayer(e.player);
+					
+					if(WingConfig.SHOW_PARTICLES) {
+						playerMP.getServerWorld().spawnParticle(EnumParticleTypes.TOTEM, playerMP.posX, playerMP.posY, playerMP.posZ, 45, 0, 0, 0, .2);
+					}
+					
+					if(WingConfig.PRINT_TO_LOG) {
+						LOGGER.info("Dropped " + playerMP.getName() + " out of the sky.");
+						LOGGER.info("Dimension: " + playerMP.dimension);
+						LOGGER.info("Position: " + niceBlockPosToString(playerMP.getPosition()));
+						for(String method : usedMethods) {
+							LOGGER.info("Method: " + method);
 						}
 					}
 				}
@@ -93,45 +99,8 @@ public class BrokenWings {
 		}
 	}
 	
-	@Config(modid = MODID)
-	@Mod.EventBusSubscriber(modid = MODID)
-	public static class WingConfig {
-		@Config.Name("Mode")
-		@Config.Comment({
-			"The rule to determine whether flight is allowed in a particular dimension.",
-			"Available options:",
-			"WHITELIST_ALL - flight is allowed in all dimensions (this mod has no effect)",
-			"BLACKLIST_ALL - flight is banned in all dimensions",
-			"WHITELIST - the \"Dimension List\" config will determine which dimensions flight is allowed in; it will be banned in all others",
-			"BLACKLIST - the \"Dimension List\" config will determine which dimensions flight is banned in; it will be allowed in all others"
-		})
-		public static ConfigMode MODE = ConfigMode.BLACKLIST;
-		
-		@Config.Name("Dimension List")
-		@Config.Comment("The dimension list, used in WHITELIST and BLACKLIST modes.")
-		public static int[] LIST = new int[]{7};
-		
-		@Config.Name("Print to Log")
-		@Config.Comment("When Broken Wings drops a player from the sky, should a message be printed to the server log?")
-		public static boolean PRINT_TO_LOG = true;
-		
-		@Config.Name("Tell Player")
-		@Config.Comment("When Broken Wings drops a player from the sky, should they receive a status message?")
-		public static boolean TELL_PLAYER = true;
-		
-		@Config.Name("Ban Elytra")
-		@Config.Comment("Will Elytra flight also be blocked?")
-		public static boolean BAN_ELYTRA = false;
-		
-		@SubscribeEvent
-		public static void configChange(ConfigChangedEvent e) {
-			if(e.getModID().equals(MODID)) {
-				ConfigManager.sync(MODID, Config.Type.INSTANCE);
-			}
-		}
+	private static String niceBlockPosToString(BlockPos pos) {
+		return pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
 	}
 	
-	public enum ConfigMode {
-		BLACKLIST, WHITELIST, BLACKLIST_ALL, WHITELIST_ALL
-	}
 }
