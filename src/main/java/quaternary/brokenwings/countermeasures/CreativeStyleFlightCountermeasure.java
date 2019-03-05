@@ -1,4 +1,4 @@
-package quaternary.brokenwings.anticompat;
+package quaternary.brokenwings.countermeasures;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 

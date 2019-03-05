@@ -1,8 +1,9 @@
-package quaternary.brokenwings.anticompat;
+package quaternary.brokenwings.countermeasures;
 
 import net.minecraftforge.common.config.Configuration;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Countermeasures {
 	public static final Set<ICountermeasure> ALL = new HashSet<>();

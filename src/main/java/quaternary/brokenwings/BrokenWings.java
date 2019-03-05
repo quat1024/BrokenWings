@@ -18,12 +18,16 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import quaternary.brokenwings.anticompat.*;
 import quaternary.brokenwings.config.ListMode;
 import quaternary.brokenwings.config.WingConfig;
+import quaternary.brokenwings.countermeasures.Countermeasures;
+import quaternary.brokenwings.countermeasures.ICountermeasure;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Mod(
 	modid = BrokenWings.MODID,
