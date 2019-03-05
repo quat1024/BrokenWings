@@ -27,7 +27,6 @@ public interface ICountermeasure {
 	/**
 	 * Try to stop this player from flying using this method.
 	 * Don't worry about cancelling velocity or playing effects; those happen outside.
-	 * @return if you think the attempt was successful.
 	 */
-	boolean tryStopFlying(EntityPlayerMP playerMP);
+	void stopFlying(EntityPlayerMP playerMP);
 }

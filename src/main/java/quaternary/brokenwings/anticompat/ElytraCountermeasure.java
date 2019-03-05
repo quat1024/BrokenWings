@@ -19,8 +19,7 @@ public class ElytraCountermeasure implements ICountermeasure {
 	}
 	
 	@Override
-	public boolean tryStopFlying(EntityPlayerMP playerMP) {
+	public void stopFlying(EntityPlayerMP playerMP) {
 		playerMP.onGround = true;
-		return true;
 	}
 }

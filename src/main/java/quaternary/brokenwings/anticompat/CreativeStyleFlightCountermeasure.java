@@ -19,10 +19,8 @@ public class CreativeStyleFlightCountermeasure implements ICountermeasure {
 	}
 	
 	@Override
-	public boolean tryStopFlying(EntityPlayerMP playerMP) {
+	public void stopFlying(EntityPlayerMP playerMP) {
 		playerMP.capabilities.isFlying = false;
 		playerMP.sendPlayerAbilities();
-		
-		return true;
 	}
 }

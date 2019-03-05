@@ -1,7 +1,12 @@
 package quaternary.brokenwings.config;
 
 import com.google.common.primitives.Ints;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import quaternary.brokenwings.BrokenWings;
 
 import javax.annotation.Nullable;
@@ -46,5 +51,27 @@ public class ConfigHelpers {
 		
 		//Thank you guava for saving me from writing an ass loop
 		return Ints.toArray(valuesAsIntList);
+	}
+	
+	static <T extends IForgeRegistryEntry<T>> List<T> getRegistryItems(IForgeRegistry<T> reg, Configuration config, String configName, String configCategory, List<T> defaultEntries, String configComment) {
+		List<String> defaultReslocs = new ArrayList<>(defaultEntries.size());
+		defaultEntries.forEach(i -> defaultReslocs.add(i.getRegistryName().toString()));
+		String[] defaultItemReslocsArray = defaultReslocs.toArray(new String[0]);
+		
+		String[] reslocsAsStringArray = config.getStringList(configName, configCategory, defaultItemReslocsArray, configComment);
+		
+		List<T> values = new ArrayList<>();
+		
+		for(String reslocS : reslocsAsStringArray) {
+			ResourceLocation resloc = new ResourceLocation(reslocS);
+			if(reg.containsKey(resloc)) {
+				values.add(reg.getValue(resloc));
+			} else {
+				BrokenWings.LOGGER.error("Can't find any registry entry named '{}'", reslocS);
+				BrokenWings.LOGGER.error("Please fix the config value named {}", configName);
+			}
+		}
+		
+		return values;
 	}
 }

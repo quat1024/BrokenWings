@@ -2,6 +2,8 @@ package quaternary.brokenwings;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +57,7 @@ public class BrokenWings {
 	}
 	
 	//shared to prevent reallocations, i guess (it's cleared every playertick anyways)
-	private static final List<String> usedMethodNames = new ArrayList<>();
+	private static final List<ICountermeasure> usedCountermeasures = new ArrayList<>();
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
@@ -67,20 +69,46 @@ public class BrokenWings {
 		
 		EntityPlayerMP playerMP = (EntityPlayerMP) player;
 		
-		boolean isFlying = false;
-		usedMethodNames.clear();
-		for(ICountermeasure anti : Countermeasures.ENABLED) {
-			if(anti.isFlying(playerMP)) {
-				isFlying |= anti.tryStopFlying(playerMP);
-				usedMethodNames.add(anti.getFriendlyName());
+		//check if the player is flying
+		usedCountermeasures.clear();
+		for(ICountermeasure c : Countermeasures.ENABLED) {
+			if(c.isFlying(playerMP)) {
+				usedCountermeasures.add(c);
 			}
 		}
 		
-		if(isFlying) {
+		//they are naughty
+		if(!usedCountermeasures.isEmpty()) {
+			//check to see if they are actually immune to the flight ban :eyes:
+			//check armor
+			for(Item whitelistItem : WingConfig.WHITELIST_ARMOR_ITEMS) {
+				for(ItemStack armor : playerMP.getArmorInventoryList()) {
+					if(!armor.isEmpty() && armor.getItem() == whitelistItem) return;
+				}
+			}
+			
+			//check main inventory
+			for(Item whitelistItem : WingConfig.WHITELIST_INVENTORY_ITEMS) {
+				//main inv + hotbar
+				for(ItemStack inv : playerMP.inventory.mainInventory) {
+					if(!inv.isEmpty() && inv.getItem() == whitelistItem) return;
+				}
+				
+				//offhand (not included in the main inventory for reasons I guess)
+				ItemStack off = playerMP.getHeldItemOffhand();
+				if(!off.isEmpty() && off.getItem() == whitelistItem) return;
+			}
+			
+			//they're not, so stop them
+			for(ICountermeasure c : usedCountermeasures) {
+				c.stopFlying(playerMP);
+			}
+			
+			//cancel their velocity
 			playerMP.motionX = 0;
 			playerMP.motionY -= 0.3;
 			playerMP.motionZ = 0;
-			playerMP./*isDirty*/isAirBorne = true;
+			playerMP./*isDirty*/isAirBorne = true; //force a velocity update
 			
 			//have the player accept this new velocity
 			playerMP.getServerWorld().getEntityTracker().sendToTrackingAndSelf(playerMP, new SPacketEntityVelocity(playerMP));
@@ -110,8 +138,8 @@ public class BrokenWings {
 						LOGGER.info("Dropped " + playerMP.getName() + " out of the sky.");
 						LOGGER.info("Dimension: " + playerMP.dimension);
 						LOGGER.info("Position: " + niceBlockPosToString(playerMP.getPosition()));
-						for(String method : usedMethodNames) {
-							LOGGER.info("Method: " + method);
+						for(ICountermeasure c : usedCountermeasures) {
+							LOGGER.info("Method: " + c.getFriendlyName());
 						}
 					}
 				}

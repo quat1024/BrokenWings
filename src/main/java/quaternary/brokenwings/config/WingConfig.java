@@ -1,5 +1,6 @@
 package quaternary.brokenwings.config;
 
+import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLLog;
@@ -8,8 +9,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import quaternary.brokenwings.BrokenWings;
 import quaternary.brokenwings.anticompat.Countermeasures;
+
+import java.util.Collections;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = BrokenWings.MODID)
 public class WingConfig {
@@ -23,6 +28,9 @@ public class WingConfig {
 	public static int EFFECT_INTERVAL;
 	
 	public static String FIXED_MESSAGE;
+	
+	public static List<Item> WHITELIST_ARMOR_ITEMS;
+	public static List<Item> WHITELIST_INVENTORY_ITEMS;
 	
 	public static Configuration config;
 	
@@ -70,8 +78,12 @@ public class WingConfig {
 		
 		EFFECT_INTERVAL = config.getInt("effectInterval", "effects", 3, 0, Integer.MAX_VALUE, "To prevent spamming players and the server console, how many seconds will need to pass before performing another effect? (Players will still drop out of the sky if they try to fly faster than this interval.)");
 		
-		FIXED_MESSAGE = config.getString("fixedStatusMessage", "etc", "", "Whatever you enter here will be sent to players when they are dropped out of the sky if 'effects.sendStatusMessage' is enabled. If this is empty, I'll choose from my own internal list of messages.");
+		FIXED_MESSAGE = config.getString("fixedStatusMessage", "effects", "", "Whatever you enter here will be sent to players when they are dropped out of the sky if 'effects.sendStatusMessage' is enabled. If this is empty, I'll choose from my own internal list of messages.");
 		FIXED_MESSAGE = FIXED_MESSAGE.trim();
+		
+		WHITELIST_ARMOR_ITEMS = ConfigHelpers.getRegistryItems(ForgeRegistries.ITEMS, config, "whitelistArmor", "general", Collections.emptyList(), "A player wearing one of these armor pieces will be immune to the no-flight rule.");
+		
+		WHITELIST_INVENTORY_ITEMS = ConfigHelpers.getRegistryItems(ForgeRegistries.ITEMS, config, "whitelistInventory", "general", Collections.emptyList(), "A player with one of these items in their inventory will be immune to the no-flight rule.");
 		
 		if(config.hasChanged()) config.save();
 	}
