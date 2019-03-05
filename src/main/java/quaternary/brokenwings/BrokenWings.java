@@ -5,10 +5,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -19,8 +21,15 @@ import quaternary.brokenwings.config.ListMode;
 import quaternary.brokenwings.config.WingConfig;
 
 import java.util.*;
+import java.util.List;
 
-@Mod(modid = BrokenWings.MODID, name = BrokenWings.NAME, version = BrokenWings.VERSION)
+@Mod(
+	modid = BrokenWings.MODID,
+	name = BrokenWings.NAME,
+	version = BrokenWings.VERSION,
+	guiFactory = "quaternary.brokenwings.config.asdf.GuiFactoryBlahblah"
+)
+@Mod.EventBusSubscriber(modid = BrokenWings.MODID)
 public class BrokenWings {
 	public static final String MODID = "brokenwings";
 	public static final String NAME = "Broken Wings";
@@ -31,16 +40,22 @@ public class BrokenWings {
 	public static final Map<String, Long> lastMessageTimes = new HashMap<>();
 	public static final Random messageRandom = new Random();
 	
+	public static final int MESSAGE_COUNT = 9;
+	
 	@Mod.EventHandler
-	public static void init(FMLInitializationEvent e) {
-		AntiCompats.init();
-		
-		WingConfig.initConfig();
-		
-		MinecraftForge.EVENT_BUS.register(BrokenWings.class);
+	public static void preinit(FMLPreInitializationEvent e) {
+		WingConfig.preinit(e);
 	}
 	
-	static final List<String> usedMethods = new ArrayList<>();
+	@Mod.EventHandler
+	public static void init(FMLInitializationEvent e) {
+		Countermeasures.createAll();
+		
+		WingConfig.init(e);
+	}
+	
+	//shared to prevent reallocations, i guess (it's cleared every playertick anyways)
+	private static final List<String> usedMethodNames = new ArrayList<>();
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
@@ -52,21 +67,22 @@ public class BrokenWings {
 		
 		EntityPlayerMP playerMP = (EntityPlayerMP) player;
 		
-		boolean wasFlying = false;
-		usedMethods.clear();
-		for(AbstractAntiCompat anti : AntiCompats.get()) {
+		boolean isFlying = false;
+		usedMethodNames.clear();
+		for(ICountermeasure anti : Countermeasures.ENABLED) {
 			if(anti.isFlying(playerMP)) {
-				wasFlying |= anti.tryStopFlying(playerMP);
-				usedMethods.add(anti.getFriendlyName());
+				isFlying |= anti.tryStopFlying(playerMP);
+				usedMethodNames.add(anti.getFriendlyName());
 			}
 		}
 		
-		if(wasFlying) {
+		if(isFlying) {
 			playerMP.motionX = 0;
 			playerMP.motionY -= 0.3;
 			playerMP.motionZ = 0;
 			playerMP./*isDirty*/isAirBorne = true;
 			
+			//have the player accept this new velocity
 			playerMP.getServerWorld().getEntityTracker().sendToTrackingAndSelf(playerMP, new SPacketEntityVelocity(playerMP));
 			
 			if(WingConfig.SEND_STATUS_MESSAGE || WingConfig.SHOW_PARTICLES || WingConfig.PRINT_TO_LOG) {
@@ -76,10 +92,14 @@ public class BrokenWings {
 					lastMessageTimes.put(playerMP.getName(), now);
 					
 					if(WingConfig.SEND_STATUS_MESSAGE) {
-						int totalMessages = 9;
-						int messageIndex = messageRandom.nextInt(totalMessages);
+						TextComponentBase msg;
+						if(WingConfig.FIXED_MESSAGE.isEmpty()) {
+							msg = new TextComponentTranslation("brokenwings.dropstatus." + messageRandom.nextInt(MESSAGE_COUNT));
+						} else {
+							msg = new TextComponentString(WingConfig.FIXED_MESSAGE);
+						}
 						
-						playerMP.sendStatusMessage(new TextComponentTranslation("brokenwings.dropstatus." + messageIndex), true);
+						playerMP.sendStatusMessage(msg, true);
 					}
 					
 					if(WingConfig.SHOW_PARTICLES) {
@@ -90,7 +110,7 @@ public class BrokenWings {
 						LOGGER.info("Dropped " + playerMP.getName() + " out of the sky.");
 						LOGGER.info("Dimension: " + playerMP.dimension);
 						LOGGER.info("Position: " + niceBlockPosToString(playerMP.getPosition()));
-						for(String method : usedMethods) {
+						for(String method : usedMethodNames) {
 							LOGGER.info("Method: " + method);
 						}
 					}
@@ -102,5 +122,4 @@ public class BrokenWings {
 	private static String niceBlockPosToString(BlockPos pos) {
 		return pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
 	}
-	
 }

@@ -2,13 +2,19 @@ package quaternary.brokenwings.anticompat;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 
-public class CapIsFlyingAntiCompat extends AbstractAntiCompat {
-	public CapIsFlyingAntiCompat() {
-		super("isFlying", "isFlying player capability");
+public class CreativeStyleFlightCountermeasure implements ICountermeasure {
+	@Override
+	public String getName() {
+		return "creativeStyle";
 	}
 	
 	@Override
-	public boolean isFlyingImpl(EntityPlayerMP playerMP) {
+	public String getFriendlyName() {
+		return "Creative-style flight";
+	}
+	
+	@Override
+	public boolean isFlying(EntityPlayerMP playerMP) {
 		return playerMP.capabilities.isFlying;
 	}
 	
