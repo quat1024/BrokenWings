@@ -17,7 +17,7 @@ public class WingsCountermeasure implements ICountermeasure {
 	
 	@Override
 	public String getFriendlyName() {
-		return "Wings mod compat";
+		return "Wings mod";
 	}
 	
 	@Override
