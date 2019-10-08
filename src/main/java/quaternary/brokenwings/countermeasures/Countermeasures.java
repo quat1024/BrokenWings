@@ -2,6 +2,7 @@ package quaternary.brokenwings.countermeasures;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
+import quaternary.brokenwings.countermeasures.compat.SimplyJetpacksCountermeasure;
 import quaternary.brokenwings.countermeasures.compat.WingsCountermeasure;
 
 import java.util.HashSet;
@@ -16,6 +17,7 @@ public class Countermeasures {
 		ALL.add(new CreativeStyleFlightCountermeasure());
 		
 		if(Loader.isModLoaded("wings")) ALL.add(new WingsCountermeasure());
+		//if(Loader.isModLoaded("simplyjetpacks")) ALL.add(new SimplyJetpacksCountermeasure());
 		
 		ENABLED.addAll(ALL);
 	}

@@ -44,9 +44,15 @@ repositories {
 }
 
 dependencies {
+	//Wings
 	deobfCompile curse.resolve("wings", "2722018")
-	
+	//Seems to fall apart when you get it from cursemaven - I think it's something on llibrary's end
 	deobfCompile "net.ilexiconn:llibrary:1.7.9-1.12.2"
+	
+	//Simply Jetpacks 2
+	runtime curse.resolve("simply-jetpacks-2", "2789696")
+	runtime curse.resolve("redstone-flux", "2623090")
+	//deobfProvided curse.resolve("redstone-repository-revolved", "2695517")
 }
 
 processResources {
