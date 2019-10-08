@@ -18,8 +18,8 @@ public class WingClientEvents {
 		if(player == null || player.world == null || !WingConfig.SHOW_WHITELIST_TOOLTIP) return;
 		
 		ItemStack i = e.getItemStack();
-		boolean isArmor = WingConfig.WHITELIST_ARMOR_ITEMS.contains(i);
-		boolean isInv = WingConfig.WHITELIST_INVENTORY_ITEMS.contains(i);
+		boolean isArmor = WingConfig.WHITELIST_ARMOR_ITEMS.contains(i, player.dimension);
+		boolean isInv = WingConfig.WHITELIST_INVENTORY_ITEMS.contains(i, player.dimension);
 		if(!isArmor && !isInv) return;
 		
 		TextFormatting color = WingConfig.MODE.isFlightInDimensionBanned(player.dimension) ? TextFormatting.GREEN : TextFormatting.RED;

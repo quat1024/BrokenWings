@@ -51,11 +51,11 @@ public class ConfigHelpers {
 	}
 	
 	static ItemList getItemList(Configuration config, String configName, String configCategory, ItemList defaultEntries, String configComment) {
-		String[] configEntry = config.getStringList(configName, configCategory, defaultEntries.toStringArray(), configComment + "\nExample formatting without metadata:\ncoolmod:boring_item\nExample formatting with metadata:\ncoolmod:fancyitem@5\n");
+		String[] configEntry = config.getStringList(configName, configCategory, defaultEntries.toStringArray(), configComment + "\nSee readme on GitHub for examples of how to add extra metadata or dimension conditions");
 		try {
 			return new ItemList().addFromStringArray(configEntry);
 		} catch(RuntimeException e) {
-			throw new RuntimeException("Problem parsing config entry '" + configName + "':");
+			throw new RuntimeException("Problem parsing config entry '" + configName + "':", e);
 		}
 	}
 }
