@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 
 @Mod(
 	modid = BrokenWings.MODID,
@@ -65,90 +66,94 @@ public class BrokenWings {
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
+		//is the configuration set to no-op mode?
 		if(WingConfig.MODE == ListMode.ALWAYS_ALLOW) return;
+		
 		EntityPlayer player = e.player;
 		if(player.world.isRemote) return;
+		
+		//are they allowed to fly in this gamemode anyways?
 		if(player.isCreative() || player.isSpectator()) return;
-		if(!WingConfig.MODE.isDimensionBanned(player.dimension)) return;
+		
+		//are they in a dimension that's even affected by the flight ban?
+		if(!WingConfig.MODE.isFlightInDimensionBanned(player.dimension)) return;
 		
 		EntityPlayerMP playerMP = (EntityPlayerMP) player;
 		
-		//check if the player is flying
+		//are they flying?
 		usedCountermeasures.clear();
 		for(ICountermeasure c : Countermeasures.ENABLED) {
 			if(c.isFlying(playerMP)) {
 				usedCountermeasures.add(c);
 			}
 		}
+		if(usedCountermeasures.isEmpty()) return; //nope!
 		
-		//they are naughty
-		if(!usedCountermeasures.isEmpty()) {
-			//check to see if they are actually immune to the flight ban :eyes:
-			//check armor
-			for(Item whitelistItem : WingConfig.WHITELIST_ARMOR_ITEMS) {
-				for(ItemStack armor : playerMP.getArmorInventoryList()) {
-					if(!armor.isEmpty() && armor.getItem() == whitelistItem) return;
-				}
-			}
+		//are they immune from getting their flight disabled?
+		if(isPlayerImmune(playerMP, usedCountermeasures)) return;
+		
+		//they're not immune, so stop the flight
+		usedCountermeasures.forEach(c -> c.stopFlying(playerMP));
+		
+		//cancel their velocity
+		playerMP.motionX = 0;
+		playerMP.motionY -= 0.3;
+		playerMP.motionZ = 0;
+		playerMP./*isDirty*/isAirBorne = true; //force a velocity update
+		
+		//have the player accept this new velocity
+		playerMP.getServerWorld().getEntityTracker().sendToTrackingAndSelf(playerMP, new SPacketEntityVelocity(playerMP));
+		
+		if(WingConfig.SEND_STATUS_MESSAGE || WingConfig.SHOW_PARTICLES || WingConfig.PRINT_TO_LOG) {
+			long now = playerMP.getServerWorld().getTotalWorldTime();
 			
-			//check main inventory
-			for(Item whitelistItem : WingConfig.WHITELIST_INVENTORY_ITEMS) {
-				//main inv + hotbar
-				for(ItemStack inv : playerMP.inventory.mainInventory) {
-					if(!inv.isEmpty() && inv.getItem() == whitelistItem) return;
-				}
+			if(now - lastMessageTimes.getOrDefault(playerMP.getName(), 0L) > 20 * WingConfig.EFFECT_INTERVAL) {
+				lastMessageTimes.put(playerMP.getName(), now);
 				
-				//offhand (not included in the main inventory for reasons I guess)
-				ItemStack off = playerMP.getHeldItemOffhand();
-				if(!off.isEmpty() && off.getItem() == whitelistItem) return;
-			}
-			
-			//they're not, so stop them
-			for(ICountermeasure c : usedCountermeasures) {
-				c.stopFlying(playerMP);
-			}
-			
-			//cancel their velocity
-			playerMP.motionX = 0;
-			playerMP.motionY -= 0.3;
-			playerMP.motionZ = 0;
-			playerMP./*isDirty*/isAirBorne = true; //force a velocity update
-			
-			//have the player accept this new velocity
-			playerMP.getServerWorld().getEntityTracker().sendToTrackingAndSelf(playerMP, new SPacketEntityVelocity(playerMP));
-			
-			if(WingConfig.SEND_STATUS_MESSAGE || WingConfig.SHOW_PARTICLES || WingConfig.PRINT_TO_LOG) {
-				long now = playerMP.getServerWorld().getTotalWorldTime();
-				
-				if(now - lastMessageTimes.getOrDefault(playerMP.getName(), 0L) > 20 * WingConfig.EFFECT_INTERVAL) {
-					lastMessageTimes.put(playerMP.getName(), now);
-					
-					if(WingConfig.SEND_STATUS_MESSAGE) {
-						TextComponentBase msg;
-						if(WingConfig.FIXED_MESSAGE.isEmpty()) {
-							msg = new TextComponentTranslation("brokenwings.dropstatus." + messageRandom.nextInt(MESSAGE_COUNT));
-						} else {
-							msg = new TextComponentString(WingConfig.FIXED_MESSAGE);
-						}
-						
-						playerMP.sendStatusMessage(msg, true);
+				if(WingConfig.SEND_STATUS_MESSAGE) {
+					TextComponentBase msg;
+					if(WingConfig.FIXED_MESSAGE.isEmpty()) {
+						msg = new TextComponentTranslation("brokenwings.dropstatus." + messageRandom.nextInt(MESSAGE_COUNT));
+					} else {
+						msg = new TextComponentString(WingConfig.FIXED_MESSAGE);
 					}
 					
-					if(WingConfig.SHOW_PARTICLES) {
-						playerMP.getServerWorld().spawnParticle(EnumParticleTypes.TOTEM, playerMP.posX, playerMP.posY, playerMP.posZ, 45, 0, 0, 0, .2);
-					}
-					
-					if(WingConfig.PRINT_TO_LOG) {
-						LOGGER.info("Dropped " + playerMP.getName() + " out of the sky.");
-						LOGGER.info("Dimension: " + playerMP.dimension);
-						LOGGER.info("Position: " + niceBlockPosToString(playerMP.getPosition()));
-						for(ICountermeasure c : usedCountermeasures) {
-							LOGGER.info("Method: " + c.getFriendlyName());
-						}
+					playerMP.sendStatusMessage(msg, true);
+				}
+				
+				if(WingConfig.SHOW_PARTICLES) {
+					playerMP.getServerWorld().spawnParticle(EnumParticleTypes.TOTEM, playerMP.posX, playerMP.posY, playerMP.posZ, 45, 0, 0, 0, .2);
+				}
+				
+				if(WingConfig.PRINT_TO_LOG) {
+					LOGGER.info("Dropped " + playerMP.getName() + " out of the sky.");
+					LOGGER.info("Dimension: " + playerMP.dimension);
+					LOGGER.info("Position: " + niceBlockPosToString(playerMP.getPosition()));
+					for(ICountermeasure c : usedCountermeasures) {
+						LOGGER.info("Method: " + c.getFriendlyName());
 					}
 				}
 			}
 		}
+	}
+	
+	private static boolean isPlayerImmune(EntityPlayerMP playerMP, List<ICountermeasure> countermeasures) {
+		//check to see if they are actually immune to the flight ban :eyes:
+		//check armor
+		for(ItemStack armor : playerMP.getArmorInventoryList()) {
+			if(!armor.isEmpty() && WingConfig.WHITELIST_ARMOR_ITEMS.contains(armor)) return true;
+		}
+		
+		//main inv + hotbar
+		for(ItemStack inv : playerMP.inventory.mainInventory) {
+			if(!inv.isEmpty() && WingConfig.WHITELIST_INVENTORY_ITEMS.contains(inv)) return true;
+		}
+		
+		//offhand (not included in the main inventory for reasons I guess)
+		ItemStack off = playerMP.getHeldItemOffhand();
+		if(!off.isEmpty() && WingConfig.WHITELIST_INVENTORY_ITEMS.contains(off)) return true;
+		
+		return false;
 	}
 	
 	private static String niceBlockPosToString(BlockPos pos) {

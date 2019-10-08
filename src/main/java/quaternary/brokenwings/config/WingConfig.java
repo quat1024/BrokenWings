@@ -1,6 +1,5 @@
 package quaternary.brokenwings.config;
 
-import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLLog;
@@ -9,12 +8,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import quaternary.brokenwings.BrokenWings;
 import quaternary.brokenwings.countermeasures.Countermeasures;
-
-import java.util.Collections;
-import java.util.List;
 
 @Mod.EventBusSubscriber(modid = BrokenWings.MODID)
 public class WingConfig {
@@ -22,8 +17,8 @@ public class WingConfig {
 	//General
 	public static int[] DIMENSION_LIST;
 	public static ListMode MODE;
-	public static List<Item> WHITELIST_ARMOR_ITEMS;
-	public static List<Item> WHITELIST_INVENTORY_ITEMS;
+	public static ItemList WHITELIST_ARMOR_ITEMS;
+	public static ItemList WHITELIST_INVENTORY_ITEMS;
 	
 	//Effects
 	public static boolean PRINT_TO_LOG;
@@ -71,9 +66,9 @@ public class WingConfig {
 			}
 		}, ListMode.class);
 		
-		WHITELIST_ARMOR_ITEMS = ConfigHelpers.getRegistryItems(ForgeRegistries.ITEMS, config, "whitelistArmor", "general", Collections.emptyList(), "A player wearing one of these armor pieces will be immune to the no-flight rule.");
+		WHITELIST_ARMOR_ITEMS = ConfigHelpers.getItemList(config, "whitelistArmor", "general", ItemList.EMPTY, "A player wearing one of these armor pieces will be immune to the no-flight rule.");
 		
-		WHITELIST_INVENTORY_ITEMS = ConfigHelpers.getRegistryItems(ForgeRegistries.ITEMS, config, "whitelistInventory", "general", Collections.emptyList(), "A player with one of these items in their inventory will be immune to the no-flight rule.");
+		WHITELIST_INVENTORY_ITEMS = ConfigHelpers.getItemList(config, "whitelistInventory", "general", ItemList.EMPTY, "A player with one of these items in their inventory will be immune to the no-flight rule.");
 		
 		//Countermeasures
 		Countermeasures.readConfig(config);

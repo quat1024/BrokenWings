@@ -1,10 +1,7 @@
 package quaternary.brokenwings.config;
 
 import com.google.common.primitives.Ints;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import quaternary.brokenwings.BrokenWings;
 
 import java.util.ArrayList;
@@ -53,25 +50,12 @@ public class ConfigHelpers {
 		return Ints.toArray(valuesAsIntList);
 	}
 	
-	static <T extends IForgeRegistryEntry<T>> List<T> getRegistryItems(IForgeRegistry<T> reg, Configuration config, String configName, String configCategory, List<T> defaultEntries, String configComment) {
-		List<String> defaultReslocs = new ArrayList<>(defaultEntries.size());
-		defaultEntries.forEach(i -> defaultReslocs.add(i.getRegistryName().toString()));
-		String[] defaultItemReslocsArray = defaultReslocs.toArray(new String[0]);
-		
-		String[] reslocsAsStringArray = config.getStringList(configName, configCategory, defaultItemReslocsArray, configComment);
-		
-		List<T> values = new ArrayList<>();
-		
-		for(String reslocS : reslocsAsStringArray) {
-			ResourceLocation resloc = new ResourceLocation(reslocS);
-			if(reg.containsKey(resloc)) {
-				values.add(reg.getValue(resloc));
-			} else {
-				BrokenWings.LOGGER.error("Can't find any registry entry named '{}'", reslocS);
-				BrokenWings.LOGGER.error("Please fix the config value named {}", configName);
-			}
+	static ItemList getItemList(Configuration config, String configName, String configCategory, ItemList defaultEntries, String configComment) {
+		String[] configEntry = config.getStringList(configName, configCategory, defaultEntries.toStringArray(), configComment + "\nExample formatting without metadata:\ncoolmod:boring_item\nExample formatting with metadata:\ncoolmod:fancyitem@5\n");
+		try {
+			return new ItemList().addFromStringArray(configEntry);
+		} catch(RuntimeException e) {
+			throw new RuntimeException("Problem parsing config entry '" + configName + "':");
 		}
-		
-		return values;
 	}
 }

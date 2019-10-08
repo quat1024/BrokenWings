@@ -2,7 +2,6 @@ package quaternary.brokenwings;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -18,12 +17,12 @@ public class WingClientEvents {
 		EntityPlayer player = e.getEntityPlayer();
 		if(player == null || player.world == null || !WingConfig.SHOW_WHITELIST_TOOLTIP) return;
 		
-		Item i = e.getItemStack().getItem();
+		ItemStack i = e.getItemStack();
 		boolean isArmor = WingConfig.WHITELIST_ARMOR_ITEMS.contains(i);
 		boolean isInv = WingConfig.WHITELIST_INVENTORY_ITEMS.contains(i);
 		if(!isArmor && !isInv) return;
 		
-		TextFormatting color = WingConfig.MODE.isDimensionBanned(player.dimension) ? TextFormatting.GREEN : TextFormatting.RED;
+		TextFormatting color = WingConfig.MODE.isFlightInDimensionBanned(player.dimension) ? TextFormatting.GREEN : TextFormatting.RED;
 		
 		e.getToolTip().add(color + I18n.format(isArmor ? "brokenwings.tooltip.armorWhitelist" : "brokenwings.tooltip.invWhitelist"));
 	}

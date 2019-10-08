@@ -6,7 +6,7 @@ public enum ListMode {
 	ALWAYS_DENY,
 	ALWAYS_ALLOW;
 	
-	public boolean isDimensionBanned(int dimID) {
+	public boolean isFlightInDimensionBanned(int dimID) {
 		if(this == ALWAYS_ALLOW) return false;
 		if(this == ALWAYS_DENY) return true;
 		

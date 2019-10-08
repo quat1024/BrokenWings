@@ -19,13 +19,13 @@ public class Countermeasures {
 	public static void readConfig(Configuration config) {
 		ENABLED.clear();
 		
-		for(ICountermeasure anti : ALL) {
-			String configName = anti.getName();
-			String friendlyName = anti.getFriendlyName();
+		for(ICountermeasure measure : ALL) {
+			String configName = measure.getName();
+			String friendlyName = measure.getFriendlyName();
 			boolean enabled = config.getBoolean(configName, "countermeasures", true, "Is the \"" + friendlyName + "\" countermeasure enabled?");
 			
 			if(enabled) {
-				ENABLED.add(anti);
+				ENABLED.add(measure);
 			}
 		}
 	}
