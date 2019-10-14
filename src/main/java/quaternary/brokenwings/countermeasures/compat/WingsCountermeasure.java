@@ -3,11 +3,7 @@ package quaternary.brokenwings.countermeasures.compat;
 import me.paulf.wings.server.flight.Flight;
 import me.paulf.wings.server.flight.Flights;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.common.config.Configuration;
 import quaternary.brokenwings.countermeasures.ICountermeasure;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class WingsCountermeasure implements ICountermeasure {
 	@Override
@@ -31,7 +27,7 @@ public class WingsCountermeasure implements ICountermeasure {
 	public void stopFlying(EntityPlayerMP playerMP) {
 		Flight f = Flights.get(playerMP);
 		if(f != null) {
-			f.setIsFlying(false, Flight.PlayerSet.ofPlayer(playerMP));
+			f.setIsFlying(false, Flight.PlayerSet.ofAll());
 		}
 	}
 }
