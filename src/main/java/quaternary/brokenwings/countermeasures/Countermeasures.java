@@ -15,6 +15,7 @@ public class Countermeasures {
 		ALL.add(new ElytraCountermeasure());
 		ALL.add(new CreativeStyleFlightCountermeasure());
 		ALL.add(new ButterfingersCountermeasure());
+		ALL.add(new GreasyArmorCountermeasure());
 		
 		if(Loader.isModLoaded("wings")) ALL.add(new WingsCountermeasure());
 		

@@ -63,7 +63,7 @@ public class ButterfingersCountermeasure implements ICountermeasure {
 			if(items.contains(yea.get(i), playerMP.dimension)) {
 				ItemStack there = yea.get(i).copy();
 				yea.set(i, ItemStack.EMPTY);
-				playerMP.dropItem(there, false, true);
+				playerMP.dropItem(there, false);
 			}
 		}
 	}
