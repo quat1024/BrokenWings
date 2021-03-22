@@ -51,7 +51,7 @@ public class ConfigHelpers {
 		return Ints.toArray(valuesAsIntList);
 	}
 	
-	static ItemList getItemList(Configuration config, String configName, String configCategory, ItemList defaultEntries, String configComment) {
+	public static ItemList getItemList(Configuration config, String configName, String configCategory, ItemList defaultEntries, String configComment) {
 		String[] configEntry = config.getStringList(configName, configCategory, defaultEntries.toStringArray(), configComment + "\nSee readme on GitHub for examples of how to add extra metadata or dimension conditions");
 		try {
 			return new ItemList().addFromStringArray(configEntry);

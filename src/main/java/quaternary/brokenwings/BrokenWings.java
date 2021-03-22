@@ -139,17 +139,17 @@ public class BrokenWings {
 		//check to see if they are actually immune to the flight ban :eyes:
 		//check armor
 		for(ItemStack armor : playerMP.getArmorInventoryList()) {
-			if(!armor.isEmpty() && WingConfig.ARMOR_BYPASS_KEYS.contains(armor, playerMP.dimension)) return true;
+			if(WingConfig.ARMOR_BYPASS_KEYS.contains(armor, playerMP.dimension)) return true;
 		}
 		
 		//main inv + hotbar
 		for(ItemStack inv : playerMP.inventory.mainInventory) {
-			if(!inv.isEmpty() && WingConfig.INVENTORY_BYPASS_KEYS.contains(inv, playerMP.dimension)) return true;
+			if(WingConfig.INVENTORY_BYPASS_KEYS.contains(inv, playerMP.dimension)) return true;
 		}
 		
 		//offhand (not included in the main inventory for reasons I guess)
 		ItemStack off = playerMP.getHeldItemOffhand();
-		if(!off.isEmpty() && WingConfig.INVENTORY_BYPASS_KEYS.contains(off, playerMP.dimension)) return true;
+		if(WingConfig.INVENTORY_BYPASS_KEYS.contains(off, playerMP.dimension)) return true;
 		
 		return false;
 	}

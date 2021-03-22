@@ -57,6 +57,8 @@ public class ItemList implements Iterable<Map.Entry<Item, ItemList.ExtraConditio
 	}
 	
 	public boolean contains(ItemStack stack, int dimension) {
+		if(stack.isEmpty()) return false;
+		
 		Collection<ExtraConditions> tests = entries.get(stack.getItem());
 		if(tests == null || tests.isEmpty()) return false;
 		else for(BiPredicate<ItemStack, Integer> test : tests) {

@@ -1,6 +1,7 @@
 package quaternary.brokenwings.countermeasures;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.common.config.Configuration;
 
 /** 
  * Represents a possible method players might use to fly.
@@ -19,6 +20,13 @@ public interface ICountermeasure {
 	String getFriendlyName();
 	
 	/**
+	 * Return a nonempty string if your countermeasure needs some explanation, it'll get appended to the "should the 'x' countermeasure be enabled" string in the config file.
+	 */
+	default String getDescription() {
+		return "";
+	}
+	
+	/**
 	 * @return If this player is flying using this method.
 	 */
 	boolean isFlying(EntityPlayerMP playerMP);
@@ -28,4 +36,12 @@ public interface ICountermeasure {
 	 * Don't worry about cancelling velocity or playing effects; those happen outside.
 	 */
 	void stopFlying(EntityPlayerMP playerMP);
+	
+	/**
+	 * Read special configuration values. Called at startup and when loading the config file.
+	 * Please put config options in the "countermeasures.[name]" category, where [name] is the value of getName().
+	 */
+	default void readConfig(Configuration config) {
+		//No-op
+	}
 }

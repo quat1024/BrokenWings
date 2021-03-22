@@ -14,6 +14,7 @@ public class Countermeasures {
 	public static void createAll() {
 		ALL.add(new ElytraCountermeasure());
 		ALL.add(new CreativeStyleFlightCountermeasure());
+		ALL.add(new ButterfingersCountermeasure());
 		
 		if(Loader.isModLoaded("wings")) ALL.add(new WingsCountermeasure());
 		
@@ -26,7 +27,15 @@ public class Countermeasures {
 		for(ICountermeasure measure : ALL) {
 			String configName = measure.getName();
 			String friendlyName = measure.getFriendlyName();
-			boolean enabled = config.getBoolean(configName, "countermeasures", true, "Is the \"" + friendlyName + "\" countermeasure enabled?");
+			
+			String description = "Is the \"" + friendlyName + "\" countermeasure enabled?";
+			if(!measure.getDescription().isEmpty()) {
+				description += " ";
+				description += measure.getDescription();
+			}
+			
+			boolean enabled = config.getBoolean(configName, "countermeasures", true, description);
+			measure.readConfig(config);
 			
 			if(enabled) {
 				ENABLED.add(measure);
