@@ -17,7 +17,6 @@ public class Countermeasures {
 		ALL.add(new CreativeStyleFlightCountermeasure());
 		
 		if(Loader.isModLoaded("wings")) ALL.add(new WingsCountermeasure());
-		//if(Loader.isModLoaded("simplyjetpacks")) ALL.add(new SimplyJetpacksCountermeasure());
 		
 		ENABLED.addAll(ALL);
 	}

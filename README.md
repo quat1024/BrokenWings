@@ -7,6 +7,15 @@ The default settings block flight in dimension 7, the Twilight Forest. It can be
 
 **This work is dedicated to the public domain.**
 
+## Compiling
+
+Hey, this is me from the future, in 2021! It looks like whatever version of ForgeGradle this used oes not work with Forge's weird jar-in-jar system or something so it explodes at runtime because Wings can't find llibrary-core.
+
+* Download LLibrary off of curse.
+* Crack it open in a zip file program and pull out `llibrary-core-<version>.jar`
+* Put it in `run/mods`.
+* Happy hacking.
+
 ## Adding extra conditions
 
 Maybe you want to have an item that lets you bypass the no-flight rule, but only in certain dimensions or with certain metadata values associated with the item.

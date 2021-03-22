@@ -4,17 +4,12 @@ buildscript {
 		maven {
 			url = "http://files.minecraftforge.net/maven"
 		}
-		maven {
-			url = "https://plugins.gradle.org/m2/"
-		}
 	}
 	dependencies {
 		classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-		classpath "com.wynprice.cursemaven:CurseMaven:1.2.3"
 	}
 }
 apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: "com.wynprice.cursemaven"
 //I CAN DO WHAT I WANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
@@ -41,18 +36,20 @@ repositories {
 		name = "ilexiconn"
 		url = "https://maven.mcmoddev.com"
 	}
+	
+	maven {
+		name = "cursemaven"
+		url = "https://www.cursemaven.com"
+	}
 }
 
 dependencies {
 	//Wings
-	deobfCompile curse.resolve("wings", "2722018")
-	//Seems to fall apart when you get it from cursemaven - I think it's something on llibrary's end
-	deobfCompile "net.ilexiconn:llibrary:1.7.9-1.12.2"
-	
-	//Simply Jetpacks 2
-	runtime curse.resolve("simply-jetpacks-2", "2789696")
-	runtime curse.resolve("redstone-flux", "2623090")
-	//deobfProvided curse.resolve("redstone-repository-revolved", "2695517")
+	deobfCompile "curse.maven:wings-302584:2829351"
+	//LLibrary (for Wings)
+	deobfCompile "curse.maven:llibrary-243298:3116493"
+	//Baubles
+	deobfCompile "curse.maven:baubles-227083:2518667"
 }
 
 processResources {
