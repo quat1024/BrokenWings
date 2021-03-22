@@ -32,8 +32,6 @@ public class ItemList implements Iterable<Map.Entry<Item, ItemList.ExtraConditio
 	private final Multimap<Item, ItemList.ExtraConditions> entries;
 	private static final ItemList.ExtraConditions TRUE = new ExtraConditions();
 	
-	public static final ItemList EMPTY = new ItemList();
-	
 	//Parsing stuff~
 	public static final String CONDITIONS_SEPARATOR = " ";
 	public static final String META_CONDITION = "meta:";

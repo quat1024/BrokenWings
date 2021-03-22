@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -17,6 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import quaternary.brokenwings.compat.BubblesProxy;
+import quaternary.brokenwings.compat.NayBubbles;
+import quaternary.brokenwings.compat.YeaBubbles;
 import quaternary.brokenwings.config.ListMode;
 import quaternary.brokenwings.config.WingConfig;
 import quaternary.brokenwings.countermeasures.Countermeasures;
@@ -44,12 +48,19 @@ public class BrokenWings {
 	
 	public static final Map<String, Long> lastMessageTimes = new HashMap<>();
 	public static final Random messageRandom = new Random();
+	public static final int MESSAGE_COUNT = 9; //How many entries are in the lang file.
 	
-	public static final int MESSAGE_COUNT = 9;
+	public static BubblesProxy BUBBLES_PROXY;
 	
 	@Mod.EventHandler
 	public static void preinit(FMLPreInitializationEvent e) {
 		WingConfig.preinit(e);
+		
+		if(Loader.isModLoaded("baubles")) {
+			BUBBLES_PROXY = new YeaBubbles();
+		} else {
+			BUBBLES_PROXY = new NayBubbles();
+		}
 	}
 	
 	@Mod.EventHandler
@@ -88,7 +99,7 @@ public class BrokenWings {
 		if(usedCountermeasures.isEmpty()) return; //nope!
 		
 		//are they immune from getting their flight disabled?
-		if(isPlayerImmune(playerMP, usedCountermeasures)) return;
+		if(isPlayerImmune(playerMP)) return;
 		
 		//they're not immune, so stop the flight
 		usedCountermeasures.forEach(c -> c.stopFlying(playerMP));
@@ -135,7 +146,7 @@ public class BrokenWings {
 		}
 	}
 	
-	private static boolean isPlayerImmune(EntityPlayerMP playerMP, List<ICountermeasure> countermeasures) {
+	private static boolean isPlayerImmune(EntityPlayerMP playerMP) {
 		//check to see if they are actually immune to the flight ban :eyes:
 		//check armor
 		for(ItemStack armor : playerMP.getArmorInventoryList()) {
@@ -150,6 +161,9 @@ public class BrokenWings {
 		//offhand (not included in the main inventory for reasons I guess)
 		ItemStack off = playerMP.getHeldItemOffhand();
 		if(WingConfig.INVENTORY_BYPASS_KEYS.contains(off, playerMP.dimension)) return true;
+		
+		//bubbles
+		if(BUBBLES_PROXY.isPlayerImmune(playerMP)) return true;
 		
 		return false;
 	}

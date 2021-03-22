@@ -18,6 +18,7 @@ public class WingConfig {
 	public static ListMode MODE;
 	public static ItemList ARMOR_BYPASS_KEYS;
 	public static ItemList INVENTORY_BYPASS_KEYS;
+	public static ItemList BUBBLE_BYPASS_KEYS;
 	
 	//Effects
 	public static boolean PRINT_TO_LOG;
@@ -61,9 +62,15 @@ public class WingConfig {
 			}
 		}, ListMode.class);
 		
-		ARMOR_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyArmor", "general", ItemList.EMPTY, "A player wearing one of these armor pieces will be immune to the no-flight rule.");
+		ARMOR_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyArmor", "general", new ItemList(), "A player wearing one of these armor pieces will be immune to the no-flight rule.");
 		
-		INVENTORY_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyInventory", "general", ItemList.EMPTY, "A player with one of these items in their inventory will be immune to the no-flight rule.");
+		INVENTORY_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyInventory", "general", new ItemList(), "A player with one of these items in their inventory will be immune to the no-flight rule.");
+		
+		if(Loader.isModLoaded("baubles")) {
+			BUBBLE_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyBauble", "compat.baubles", new ItemList(), "A player wearing one of these Baubles will be immune to the no-flight rule.");
+		} else {
+			BUBBLE_BYPASS_KEYS = new ItemList();
+		}
 		
 		//Countermeasures
 		Countermeasures.readConfig(config);

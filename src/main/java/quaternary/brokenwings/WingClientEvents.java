@@ -20,10 +20,20 @@ public class WingClientEvents {
 		ItemStack i = e.getItemStack();
 		boolean isArmor = WingConfig.ARMOR_BYPASS_KEYS.contains(i, player.dimension);
 		boolean isInv = WingConfig.INVENTORY_BYPASS_KEYS.contains(i, player.dimension);
-		if(!isArmor && !isInv) return;
+		boolean isBubble = WingConfig.BUBBLE_BYPASS_KEYS.contains(i, player.dimension);
+		if(!isArmor && !isInv && !isBubble) return;
 		
 		TextFormatting color = WingConfig.MODE.isFlightInDimensionBanned(player.dimension) ? TextFormatting.GREEN : TextFormatting.RED;
 		
-		e.getToolTip().add(color + I18n.format(isArmor ? "brokenwings.tooltip.armorBypassKey" : "brokenwings.tooltip.inventoryBypassKey"));
+		String lang;
+		if(isArmor) {
+			lang = "brokenwings.tooltip.armorBypassKey";
+		} else if(isInv) {
+			lang = "brokenwings.tooltip.inventoryBypassKey";
+		} else { //isBubble
+			lang = "brokenwings.tooltip.baubleBypassKey";
+		}
+		
+		e.getToolTip().add(color + I18n.format(lang));
 	}
 }
