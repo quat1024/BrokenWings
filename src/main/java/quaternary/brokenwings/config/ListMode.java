@@ -1,8 +1,8 @@
 package quaternary.brokenwings.config;
 
 public enum ListMode {
-	WHITELIST,
-	BLACKLIST,
+	ALLOW_LIST,
+	DENY_LIST,
 	ALWAYS_DENY,
 	ALWAYS_ALLOW;
 	
@@ -18,7 +18,7 @@ public enum ListMode {
 			}
 		}
 		
-		if(this == BLACKLIST) return found;
+		if(this == DENY_LIST) return found;
 		else return !found; //whitelist		
 	}
 }

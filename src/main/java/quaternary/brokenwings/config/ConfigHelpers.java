@@ -16,11 +16,12 @@ public class ConfigHelpers {
 		
 		//Do not touch
 		String userProvidedString = config.getString(configName, configCategory, defaultValue.toString(), configDescription + "\n" + Arrays.stream(enumConstants).map(t -> "\"" + t.toString() + "\": " + describerFunction.apply(t)).reduce((one, two) -> one + '\n' + two).get() + '\n', Arrays.stream(enumConstants).map(T::toString).toArray(String[]::new));
+		String userProvidedStringPatch = WingConfig.patchEnumLol(userProvidedString);
 		
-		Optional<T> userEnum = Arrays.stream(enumConstants).filter(t -> t.toString().equals(userProvidedString)).findAny();
+		Optional<T> userEnum = Arrays.stream(enumConstants).filter(t -> t.toString().equals(userProvidedStringPatch)).findAny();
 		
 		if(userEnum.isPresent()) return userEnum.get();
-		else throw new IllegalArgumentException("\"" + userProvidedString + "\" is not a valid value for config option " + configName + "! See the config file for details");
+		else throw new IllegalArgumentException("\"" + userProvidedStringPatch + "\" is not a valid value for config option " + configName + "! See the config file for details");
 	}
 	
 	static int[] getIntArray(Configuration config, String configName, String configCategory, int[] defaultsAsIntArray, String configComment) {

@@ -2,7 +2,6 @@ package quaternary.brokenwings;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumParticleTypes;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Predicate;
 
 @Mod(
 	modid = BrokenWings.MODID,
@@ -141,17 +139,17 @@ public class BrokenWings {
 		//check to see if they are actually immune to the flight ban :eyes:
 		//check armor
 		for(ItemStack armor : playerMP.getArmorInventoryList()) {
-			if(!armor.isEmpty() && WingConfig.WHITELIST_ARMOR_ITEMS.contains(armor, playerMP.dimension)) return true;
+			if(!armor.isEmpty() && WingConfig.ARMOR_BYPASS_KEYS.contains(armor, playerMP.dimension)) return true;
 		}
 		
 		//main inv + hotbar
 		for(ItemStack inv : playerMP.inventory.mainInventory) {
-			if(!inv.isEmpty() && WingConfig.WHITELIST_INVENTORY_ITEMS.contains(inv, playerMP.dimension)) return true;
+			if(!inv.isEmpty() && WingConfig.INVENTORY_BYPASS_KEYS.contains(inv, playerMP.dimension)) return true;
 		}
 		
 		//offhand (not included in the main inventory for reasons I guess)
 		ItemStack off = playerMP.getHeldItemOffhand();
-		if(!off.isEmpty() && WingConfig.WHITELIST_INVENTORY_ITEMS.contains(off, playerMP.dimension)) return true;
+		if(!off.isEmpty() && WingConfig.INVENTORY_BYPASS_KEYS.contains(off, playerMP.dimension)) return true;
 		
 		return false;
 	}

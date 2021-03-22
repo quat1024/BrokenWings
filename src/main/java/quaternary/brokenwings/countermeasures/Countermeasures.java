@@ -2,7 +2,6 @@ package quaternary.brokenwings.countermeasures;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
-import quaternary.brokenwings.countermeasures.compat.SimplyJetpacksCountermeasure;
 import quaternary.brokenwings.countermeasures.compat.WingsCountermeasure;
 
 import java.util.HashSet;

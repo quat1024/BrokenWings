@@ -15,15 +15,15 @@ public class WingClientEvents {
 	@SubscribeEvent
 	public static void tooltip(ItemTooltipEvent e) {
 		EntityPlayer player = e.getEntityPlayer();
-		if(player == null || player.world == null || !WingConfig.SHOW_WHITELIST_TOOLTIP) return;
+		if(player == null || player.world == null || !WingConfig.SHOW_BYPASS_KEY_TOOLTIP) return;
 		
 		ItemStack i = e.getItemStack();
-		boolean isArmor = WingConfig.WHITELIST_ARMOR_ITEMS.contains(i, player.dimension);
-		boolean isInv = WingConfig.WHITELIST_INVENTORY_ITEMS.contains(i, player.dimension);
+		boolean isArmor = WingConfig.ARMOR_BYPASS_KEYS.contains(i, player.dimension);
+		boolean isInv = WingConfig.INVENTORY_BYPASS_KEYS.contains(i, player.dimension);
 		if(!isArmor && !isInv) return;
 		
 		TextFormatting color = WingConfig.MODE.isFlightInDimensionBanned(player.dimension) ? TextFormatting.GREEN : TextFormatting.RED;
 		
-		e.getToolTip().add(color + I18n.format(isArmor ? "brokenwings.tooltip.armorWhitelist" : "brokenwings.tooltip.invWhitelist"));
+		e.getToolTip().add(color + I18n.format(isArmor ? "brokenwings.tooltip.armorBypassKey" : "brokenwings.tooltip.inventoryBypassKey"));
 	}
 }
