@@ -67,7 +67,7 @@ public class WingConfig {
 		INVENTORY_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyInventory", "general", new ItemList(), "A player with one of these items in their inventory will be immune to the no-flight rule.");
 		
 		if(Loader.isModLoaded("baubles")) {
-			BUBBLE_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyBauble", "compat.baubles", new ItemList(), "A player wearing one of these Baubles will be immune to the no-flight rule.");
+			BUBBLE_BYPASS_KEYS = ConfigHelpers.getItemList(config, "bypassKeyBauble", "general", new ItemList(), "A player wearing one of these Baubles will be immune to the no-flight rule.");
 		} else {
 			BUBBLE_BYPASS_KEYS = new ItemList();
 		}
