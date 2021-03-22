@@ -2,6 +2,7 @@ package quaternary.brokenwings.countermeasures;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
+import quaternary.brokenwings.countermeasures.compat.GreasyBaublesCountermeasure;
 import quaternary.brokenwings.countermeasures.compat.WingsCountermeasure;
 
 import java.util.HashSet;
@@ -18,6 +19,7 @@ public class Countermeasures {
 		ALL.add(new GreasyArmorCountermeasure());
 		
 		if(Loader.isModLoaded("wings")) ALL.add(new WingsCountermeasure());
+		if(Loader.isModLoaded("baubles")) ALL.add(new GreasyBaublesCountermeasure());
 		
 		ENABLED.addAll(ALL);
 	}

@@ -28,7 +28,7 @@ public class GreasyArmorCountermeasure implements ICountermeasure {
 	@Override
 	public void readConfig(Configuration config) {
 		String cat = "countermeasures." + getName();
-		items = ConfigHelpers.getItemList(config, "items", cat, new ItemList(), "Items to automatically unequip.");
+		items = ConfigHelpers.getItemList(config, "items", cat, new ItemList(), "Items to automatically unequip when worn as armor.");
 	}
 	
 	@Override
